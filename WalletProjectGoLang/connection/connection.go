@@ -8,7 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-var infuraURL = "https://mainnet.infura.io/v3/8f72021b7a5f405990c4b3a9f0a90bfa"
+var infuraURL = "https://mainnet.infura.io/v3/YOUR_INFURA_ID"
 
 func InitClient() (client *ethclient.Client) {
 	//create the client and connect it to the mainnet via infura
