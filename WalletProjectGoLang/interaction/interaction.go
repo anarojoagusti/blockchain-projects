@@ -11,7 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-func BalanceOf(addr string, client *ethclient.Client) {
+func BalanceOf(addr string, client *ethclient.Client) string {
 	address := common.HexToAddress(addr)
 
 	balance, err := client.BalanceAt(context.Background(), address, nil)
@@ -24,5 +24,5 @@ func BalanceOf(addr string, client *ethclient.Client) {
 	fmt.Println("The balance is: ", fBalance)
 	//convert wei to ether --> 1 eth = 10 ^ 18 wei
 	balanceEther := new(big.Float).Quo(fBalance, big.NewFloat(math.Pow10(18)))
-	fmt.Println("Ether balance: ", balanceEther)
+	return fmt.Sprintf("%f", balanceEther)
 }
