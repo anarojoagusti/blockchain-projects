@@ -19,16 +19,17 @@ const config = {
 const game = new Phaser.Game(config);
 
 function preload() {
-    this.load.image('sky', 'assets/sky.png');
-    this.load.image('ground', 'assets/platform.png');
+    this.load.image('sky', 'assets/background/sky1.png');
+    this.load.image('ground', 'assets/backgrounf/ground.png');
     this.load.image('star', 'assets/star.png');
     this.load.image('player', 'assets/player.png');
 }
 
 function create() {
+    //Sky inst
     this.add.image(400, 300, 'sky');
 
-    // Platform inits
+    // Platform inst
     const platforms = this.physics.add.staticGroup();
     platforms.create(400, 568, 'ground').setScale(2).refreshBody();
 
