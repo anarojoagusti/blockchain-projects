@@ -1,5 +1,11 @@
 {
   "dependencies": {
-    "phaser": "^3.86.0"
+    "@reown/walletkit": "^1.1.1",
+    "@walletconnect/core": "^2.17.1",
+    "@walletconnect/utils": "^2.17.1",
+    "connectkit": "^1.8.2",
+    "phaser": "^3.86.0",
+    "wagmi": "^2.12.25",
+    "web3": "^4.14.0"
   }
 }

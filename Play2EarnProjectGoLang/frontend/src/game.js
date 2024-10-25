@@ -1,33 +1,66 @@
-const config = {
-    type: Phaser.AUTO,
-    width: 800,
-    height: 600,
-    parent: 'game-container',
-    physics: {
-        default: 'arcade',
-        arcade: {
-            gravity: { y: 300 },
-            debug: false
-        }
-    },
-    scene: {
-        preload: preload,
-        create: create,
-        update: update
-    }
-};
-
-const game = new Phaser.Game(config);
-
+/// GLOBAL VARS
 let player;
 let cursors;
 let stars;
+let enemies;
 let score = 0;
 let scoreText;
+let web3;
+let userAddress;
 
+///----------------- CONNECT WALLET SCENE -------------------
+class RegisterScene extends Phaser.Scene {
+    constructor() {
+        super({ key: 'RegisterScene' });
+    }
+
+    preload() {
+        this.load.image('sky', 'assets/background/sky1.png');
+    }
+
+    create() {
+        // Background
+        let sky = this.add.image(400, 300, 'sky');
+        sky.setDisplaySize(800, 600);
+        this.add.text(160, 150, 'Connect your wallet to proceed:', { fontSize: '24px', fill: '#ff69b4', stroke: '#424242', strokeThickness: 4 });
+        const connectButton = this.add.text(250, 210, 'Connect Wallet', { fontSize: '32px', fill: '#ffffff', backgroundColor: '#ff69b4', padding: { x: 10, y: 5 }})
+            .setInteractive()
+            .on('pointerdown', async () => {
+                if (typeof window.ethereum !== 'undefined') {
+                    try {
+                        await window.ethereum.request({ method: 'eth_requestAccounts' });
+                        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                        userAddress = accounts[0];
+                        this.add.text(60, 500, 'Connected: ' + userAddress, { fontSize: '20px', fill: '#ffffff', stroke: '#424242', strokeThickness: 4});
+                        this.add.text(220, 520, 'Press SPACE to continue', { fontSize: '24px', fill: '#ff69b4', stroke: '#424242', strokeThickness: 4});
+                    } catch (error) {
+                        console.error('User denied account access', error);
+                    }
+                } else {
+                    console.error('MetaMask is not installed');
+                    this.add.text(200, 350, 'MetaMask is not installed', { fontSize: '18px', fill: '#ff69b4', stroke: '#424242', strokeThickness: 4 });
+                }
+            });
+
+        cursors = this.input.keyboard.createCursorKeys();
+    }
+
+    update() {
+        if (userAddress && cursors.space.isDown) {
+            this.scene.start('GameScene');
+        }
+    }
+}
+///----------------- CONNECT WALLET SCENE -------------------
+
+///---------------------- GAME SCENE ------------------------
+class GameScene extends Phaser.Scene {
+    constructor() {
+        super({ key: 'GameScene' });
+    }
 
     // Load the image assets - 2D textures
-    function preload() {
+    preload() {
         this.load.image('sky', 'assets/background/sky1.png');
         this.load.image('ground', 'assets/background/Rock.png');
         this.load.image('star', 'assets/items/star.png');
@@ -37,7 +70,7 @@ let scoreText;
         
     }
 
-    function create() {
+    create() {
         // Background
         let sky = this.add.image(400, 300, 'sky');
         sky.setDisplaySize(800, 600);
@@ -78,10 +111,10 @@ let scoreText;
         this.physics.add.overlap(player, stars, collectStar, null, this);
     
         // Score
-        scoreText = this.add.text(16, 16, 'Level 1 - Score: 0', { fontSize: '32px', fill: '#ff69b4', stroke: '#000', strokeThickness: 4 });
+        scoreText = this.add.text(16, 16, 'Level 1 - Score: 0', { fontSize: '32px', fill: '#ff69b4', stroke: '#424242', strokeThickness: 4 });
     }
     
-    function update() {
+    update() {
         // Player input control
         if (cursors.left.isDown) {
             player.setVelocityX(-160);
@@ -100,51 +133,86 @@ let scoreText;
             player.setVelocityY(-600);
         }
     }
+}
+///---------------------- GAME SCENE ------------------------
+
+///---------------------- GENERAL CONFIG --------------------
+const config = {
+    type: Phaser.AUTO,
+    width: 800,
+    height: 600,
+    parent: 'game-container',
+    physics: {
+        default: 'arcade',
+        arcade: {
+            gravity: { y: 300 },
+            debug: false
+        }
+    },
+    scene: [RegisterScene,  GameScene]
+};
+
+const game = new Phaser.Game(config);
+   
+function createPlatforms(platforms) {
+    platforms.create(0, 568, 'ground').setDisplaySize(150, 250).refreshBody();
+    platforms.create(200, 500, 'ground').setDisplaySize(200, 250).refreshBody();
+    platforms.create(450, 450, 'ground').setDisplaySize(200, 300).refreshBody();
+    platforms.create(650, 568, 'ground').setDisplaySize(200, 250).refreshBody();
+    platforms.create(750, 250, 'ground').setDisplaySize(150, 200).refreshBody();
+}
+
+function spawnStars(platforms) {
+    platforms.children.iterate((platform) => {
+        if (platform.body) {
+            let starX = Phaser.Math.Between(platform.body.position.x, platform.body.position.x + platform.displayWidth);
+            let starY = platform.body.position.y - 200;
+            stars.add(platforms.scene.physics.add.sprite(starX, starY, 'star'));
+        }
+    });
+
+    stars.children.iterate((child) => {
+        child.setBounceY(Phaser.Math.FloatBetween(0.1, 0.3));
+    });
+}
+
+function spawnEnemies(platforms) {
+    let platformIndex = 0;
+    platforms.children.iterate((platform) => {
+        if (platform.body && platformIndex % 2 !== 0) {
+            let enemyX = Phaser.Math.Between(platform.body.position.x, platform.body.position.x + platform.displayWidth);
+            let enemyY = platform.body.position.y - 200;
+            enemies.add(platforms.scene.physics.add.sprite(enemyX, enemyY, 'enemy'));
+        }
+        platformIndex++;
+    });
+}
     
-    function createPlatforms(platforms) {
-        platforms.create(0, 568, 'ground').setDisplaySize(150, 250).refreshBody();
-        platforms.create(200, 500, 'ground').setDisplaySize(200, 250).refreshBody();
-        platforms.create(450, 450, 'ground').setDisplaySize(200, 300).refreshBody();
-        platforms.create(650, 568, 'ground').setDisplaySize(200, 250).refreshBody();
-        platforms.create(750, 250, 'ground').setDisplaySize(150, 200).refreshBody();
+function collectStar(player, star) {
+    star.disableBody(true, true);
+    score += 10;
+    scoreText.setText('Score: ' + score);
+
+    if (stars.countActive(true) === 0) {
+        endGame();
     }
+}
+
+function hitEnemy(player, enemy) {
+    this.physics.pause();
+    player.setTint(0xff0000);
+    player.anims.stop();
+    player.setPosition(50, 0);
+    this.physics.resume();
+}
+
+function endGame() {
+    scoreText.setText('Game Over - Score: ' + score);
+    setTimeout(() => {
+        game.scene.keys.GameScene.scene.start('RegisterScene');
+    }, 3000);
+}
+
+
     
-    function spawnStars(platforms) {
-        platforms.children.iterate((platform) => {
-            if (platform.body) {
-                let starX = Phaser.Math.Between(platform.body.position.x, platform.body.position.x + platform.displayWidth);
-                let starY = platform.body.position.y - 200;
-                stars.add(game.scene.scenes[0].physics.add.sprite(starX, starY, 'star'));
-            }
-        });
     
-        stars.children.iterate((child) => {
-            child.setBounceY(Phaser.Math.FloatBetween(0.1, 0.3));
-        });
-    }
-    
-    function spawnEnemies(platforms) {
-        let platformIndex = 0;
-        platforms.children.iterate((platform) => {
-            if (platform.body && platformIndex % 2 !== 0) {
-                let enemyX = Phaser.Math.Between(platform.body.position.x, platform.body.position.x + platform.displayWidth);
-                let enemyY = platform.body.position.y - 200;
-                enemies.add(game.scene.scenes[0].physics.add.sprite(enemyX, enemyY, 'enemy'));
-            }
-            platformIndex++;
-        });
-    }
-    
-    function collectStar(player, star) {
-        star.disableBody(true, true);
-        score += 10;
-        scoreText.setText('Score: ' + score);
-    }
-    
-    function hitEnemy(player, enemy) {
-        this.physics.pause();
-        player.setTint(0xff0000);
-        player.anims.stop();
-        player.setPosition(50, 0);
-        this.physics.resume();
-    }

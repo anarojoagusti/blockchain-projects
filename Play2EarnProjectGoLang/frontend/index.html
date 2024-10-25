@@ -3,27 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Play to Earn Game </title>
-    <script src="node_modules/phaser/dist/phaser.js"></script>
+    <title>Play2Earn Game</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react/umd/react.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/connectkit/dist/connectkit.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tanstack/react-query@latest/dist/query.production.min.js"></script>
+    <script src="https://unpkg.com/@wagmi/core@latest/dist/wagmi.umd.min.js"></script>
+    <script type="module" src="./src/wagmiConfig.js"></script>
+    <script type="module" src="./src/game.js"></script>
     <style>
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             margin: 0;
-            background-color: #2e2e2e;
+            overflow: hidden;
         }
-
         #game-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
     </style>
 </head>
 <body>
     <div id="game-container"></div>
-    <script src="./src/game.js"></script>
 </body>
 </html>
+
+    
