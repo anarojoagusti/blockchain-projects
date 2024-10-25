@@ -7,6 +7,7 @@ let score = 0;
 let scoreText;
 let web3;
 let userAddress;
+let hasClaimedReward = false;
 
 ///----------------- CONNECT WALLET SCENE -------------------
 class RegisterScene extends Phaser.Scene {
@@ -23,6 +24,7 @@ class RegisterScene extends Phaser.Scene {
         let sky = this.add.image(400, 300, 'sky');
         sky.setDisplaySize(800, 600);
         this.add.text(160, 150, 'Connect your wallet to proceed:', { fontSize: '24px', fill: '#ff69b4', stroke: '#424242', strokeThickness: 4 });
+        // Connect wallet
         const connectButton = this.add.text(250, 210, 'Connect Wallet', { fontSize: '32px', fill: '#ffffff', backgroundColor: '#ff69b4', padding: { x: 10, y: 5 }})
             .setInteractive()
             .on('pointerdown', async () => {
@@ -41,6 +43,13 @@ class RegisterScene extends Phaser.Scene {
                     this.add.text(200, 350, 'MetaMask is not installed', { fontSize: '18px', fill: '#ff69b4', stroke: '#424242', strokeThickness: 4 });
                 }
             });
+        
+        // Claim Rewards Button
+        const claimButton = this.add.text(250, 400, 'Claim Rewards', { fontSize: '32px', fill: '#ffffff', backgroundColor: '#0000ff', padding: { x: 10, y: 5 }})
+            .setInteractive()
+            .on('pointerdown', () => {
+                this.claimRewards();
+            });
 
         cursors = this.input.keyboard.createCursorKeys();
     }
@@ -48,6 +57,25 @@ class RegisterScene extends Phaser.Scene {
     update() {
         if (userAddress && cursors.space.isDown) {
             this.scene.start('GameScene');
+        }
+    }
+
+    async claimRewards() {
+        if (typeof window.ethereum !== 'undefined' && !hasClaimedReward && score > 0) {
+            try {
+                if (!window.web3) {
+                    window.web3 = new Web3(window.ethereum);
+                }
+    
+                const contract = new window.web3.eth.Contract(Play2EarnABI, '0x88a606BB7a8a54fA4Bf32B78DF3E6C8Ac2722d3E');
+                await contract.methods.rewardPlayer(score).send({ from: userAddress });
+                hasClaimedReward = true;
+                alert('Reward claimed successfully!');
+            } catch (error) {
+                console.error('Failed to claim reward:', error);
+            }
+        } else {
+            alert('You have already claimed your reward or no score available.');
         }
     }
 }
@@ -199,11 +227,11 @@ function collectStar(player, star) {
 }
 
 function hitEnemy(player, enemy) {
-    this.physics.pause();
+    /*this.physics.pause();
     player.setTint(0xff0000);
     player.anims.stop();
     player.setPosition(50, 0);
-    this.physics.resume();
+    this.physics.resume();*/
 }
 
 function endGame() {
