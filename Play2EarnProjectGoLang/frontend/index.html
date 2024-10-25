@@ -3,10 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Play to Earn Game</title>
+    <title>Play to Earn Game </title>
     <script src="node_modules/phaser/dist/phaser.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #2e2e2e;
+        }
+
+        #game-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
 </head>
 <body>
-    <script src="game.js"></script>
+    <div id="game-container"></div>
+    <script src="./src/game.js"></script>
 </body>
 </html>
